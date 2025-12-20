@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+
+{% block title %}登录 - 共享空间{% endblock %}
+
+{% block content %}
+<div class="login-container">
+    <div class="login-card clay-card">
+        <h1 class="login-title">共享空间</h1>
+        <p class="login-subtitle">请输入密码访问</p>
+
+        <form id="loginForm" class="login-form">
+            <input
+                type="password"
+                id="password"
+                class="clay-input"
+                placeholder="请输入密码"
+                autocomplete="off"
+                required
+            >
+            <button type="submit" class="clay-btn-primary">确认登录</button>
+        </form>
+
+        <div id="errorMessage" class="error-message" style="display: none;"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/auth.js') }}"></script>
+{% endblock %}

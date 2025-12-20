@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}空间 - 共享空间{% endblock %}
+
+{% block content %}
+<div class="tip-bar">
+    💡 提示：按 Ctrl+V 可快速上传文本和任何文件
+</div>
+<div class="space-layout">
+    <!-- 左侧空间列表 -->
+    <div class="space-sidebar clay-card">
+        <h2>我的空间</h2>
+        <div id="sidebarSpaceList" class="sidebar-space-list"></div>
+        <button class="clay-btn-secondary" onclick="goHome()">返回首页</button>
+    </div>
+
+    <!-- 右侧内容区 -->
+    <div class="content-area">
+        <!-- 文件列表 -->
+        <div class="file-list-container clay-card">
+            <div class="file-list-header">
+                <h3 id="currentSpaceName">空间名称</h3>
+                <button class="clay-btn-icon" onclick="showDeleteSpaceConfirm()" title="删除空间">🗑️</button>
+            </div>
+
+            <!-- 文件上传 -->
+            <input type="file" id="fileInput" multiple style="display: none;">
+            <button class="clay-btn-secondary" onclick="document.getElementById('fileInput').click()">📁 上传文件</button>
+
+            <!-- 文件列表 -->
+            <div id="fileList" class="file-list"></div>
+        </div>
+
+        <!-- 预览区 -->
+        <div class="preview-container clay-card">
+            <h3>预览</h3>
+            <div id="previewArea" class="preview-area">
+                <p class="preview-placeholder">选择一个项目进行预览</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- 删除空间确认模态框 -->
+<div id="deleteSpaceModal" class="modal" style="display: none;">
+    <div class="modal-content clay-card">
+        <h2>确认删除</h2>
+        <p>确定要删除这个空间吗？空间内的所有文件也会被删除。</p>
+        <div class="modal-actions">
+            <button class="clay-btn-primary" onclick="confirmDeleteSpace()">确认删除</button>
+            <button class="clay-btn-secondary" onclick="closeDeleteSpaceModal()">取消</button>
+        </div>
+    </div>
+</div>
+
+<div id="successMessage" class="success-message" style="display: none;"></div>
+<div id="errorMessage" class="error-message" style="display: none;"></div>
+
+<script>
+    const SPACE_ID = {{ space_id }};
+</script>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/space.js') }}"></script>
+<script src="{{ url_for('static', filename='js/file.js') }}"></script>
+{% endblock %}

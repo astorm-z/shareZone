@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+
+{% block title %}首页 - 共享空间{% endblock %}
+
+{% block content %}
+<div class="home-container">
+    <div class="home-card clay-card">
+        <h1 class="home-title">共享空间</h1>
+
+        <!-- 公告区 -->
+        <div class="announcement-box">
+            <div class="announcement-header">
+                <span class="announcement-icon">📢</span>
+                <span class="announcement-title">项目说明</span>
+            </div>
+            <div class="announcement-wrapper" onclick="toggleAnnouncement()">
+                <div class="announcement-content collapsed" id="announcementContent">
+                <p><strong>欢迎使用共享空间！</strong></p>
+                <p>这是一个轻量级的文件和文本共享工具，让你可以快速创建私密空间，在不同设备间传输内容。</p>
+
+                <p><strong>主要功能：</strong></p>
+                <ul>
+                    <li>创建多个独立的共享空间，每个空间有独立密码保护</li>
+                    <li>支持文本和文件上传（最大20MB）</li>
+                    <li>支持 Ctrl+V 快捷粘贴上传</li>
+                    <li>支持图片预览和文本编辑</li>
+                </ul>
+
+                <p><strong>过期规则：</strong></p>
+                <ul>
+                    <li>📅 文件过期时间：上传后 <strong>24小时</strong> 自动删除</li>
+                    <li>📅 空间过期时间：最后访问后 <strong>24小时</strong> 自动删除</li>
+                    <li>🔄 系统每 <strong>10分钟</strong> 自动清理过期内容</li>
+                    <li>💡 建议及时下载重要文件，避免过期丢失</li>
+                </ul>
+
+                <p><strong>注意事项：</strong></p>
+                <ul>
+                    <li>⚠️ 请勿上传敏感或重要文件，本项目仅供个人学习使用</li>
+                    <li>⚠️ 文件存储在本地服务器，请定期备份重要数据</li>
+                    <li>⚠️ 单个文件大小限制为 20MB</li>
+                    <li>⚠️ 请妥善保管空间密码，密码丢失无法找回</li>
+                </ul>
+            </div>
+            <div class="announcement-hint collapsed" id="announcementHint">
+                <span class="hint-text"></span>
+                <span class="hint-icon">▼</span>
+            </div>
+            </div>
+        </div>
+
+        <div class="home-actions">
+            <button class="clay-btn-primary" onclick="showCreateModal()">创建共享空间</button>
+            <button class="clay-btn-secondary" onclick="showEnterModal()">进入共享空间</button>
+        </div>
+
+        <div id="spaceList" class="space-list"></div>
+    </div>
+</div>
+
+<!-- 创建空间模态框 -->
+<div id="createModal" class="modal" style="display: none;">
+    <div class="modal-content clay-card">
+        <h2>创建共享空间</h2>
+        <form id="createForm">
+            <input type="text" id="spaceName" class="clay-input" placeholder="空间名称" required>
+            <input type="password" id="spacePassword" class="clay-input" placeholder="空间密码" required>
+            <div class="modal-actions">
+                <button type="submit" class="clay-btn-primary">创建</button>
+                <button type="button" class="clay-btn-secondary" onclick="closeCreateModal()">取消</button>
+            </div>
+        </form>
+        <div id="createError" class="error-message" style="display: none;"></div>
+    </div>
+</div>
+
+<!-- 进入空间模态框 -->
+<div id="enterModal" class="modal" style="display: none;">
+    <div class="modal-content clay-card">
+        <h2>进入共享空间</h2>
+        <form id="enterForm">
+            <input type="password" id="enterPassword" class="clay-input" placeholder="空间密码" required>
+            <div class="modal-actions">
+                <button type="submit" class="clay-btn-primary">进入</button>
+                <button type="button" class="clay-btn-secondary" onclick="closeEnterModal()">取消</button>
+            </div>
+        </form>
+        <div id="enterError" class="error-message" style="display: none;"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/space.js') }}"></script>
+<script>
+// 切换公告展开/折叠
+function toggleAnnouncement() {
+    const content = document.getElementById('announcementContent');
+    const hint = document.getElementById('announcementHint');
+
+    if (content.classList.contains('collapsed')) {
+        content.classList.remove('collapsed');
+        content.classList.add('expanded');
+        hint.classList.remove('collapsed');
+        hint.classList.add('expanded');
+    } else {
+        content.classList.remove('expanded');
+        content.classList.add('collapsed');
+        hint.classList.remove('expanded');
+        hint.classList.add('collapsed');
+    }
+}
+</script>
+{% endblock %}
