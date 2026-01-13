@@ -2,7 +2,7 @@ import sqlite3
 from datetime import datetime
 from contextlib import contextmanager
 import config
-from .models import CREATE_TABLES_SQL, MIGRATE_SPACES_TABLE
+from .models import CREATE_TABLES_SQL
 
 
 class DatabaseManager:
@@ -17,24 +17,6 @@ class DatabaseManager:
         with self.get_connection() as conn:
             conn.executescript(CREATE_TABLES_SQL)
             conn.commit()
-            # 检查是否需要迁移（去掉 UNIQUE 约束）
-            self._migrate_if_needed(conn)
-
-    def _migrate_if_needed(self, conn):
-        """检查并执行数据库迁移"""
-        try:
-            # 检查 spaces 表是否有 UNIQUE 约束
-            cursor = conn.cursor()
-            cursor.execute("SELECT sql FROM sqlite_master WHERE type='table' AND name='spaces'")
-            result = cursor.fetchone()
-            if result and 'UNIQUE' in result[0]:
-                # 需要迁移
-                print("[数据库] 正在迁移 spaces 表，去掉 UNIQUE 约束...")
-                conn.executescript(MIGRATE_SPACES_TABLE)
-                conn.commit()
-                print("[数据库] 迁移完成")
-        except Exception as e:
-            print(f"[数据库] 迁移检查失败: {e}")
 
     @contextmanager
     def get_connection(self):

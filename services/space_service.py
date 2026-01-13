@@ -9,16 +9,10 @@ class SpaceService:
 
     def create_space(self, name, password):
         """创建空间"""
-        # 先将已过期的同名空间标记为删除（释放名称）
-        db.execute(
-            "UPDATE spaces SET is_deleted = 1 WHERE name = ? AND expires_at <= ?",
-            (name, datetime.now())
-        )
-
-        # 检查空间名称是否已存在（排除已删除和已过期的）
+        # 检查空间名称是否已存在
         existing_name = db.query_one(
-            "SELECT id FROM spaces WHERE name = ? AND is_deleted = 0 AND expires_at > ?",
-            (name, datetime.now())
+            "SELECT id FROM spaces WHERE name = ? AND is_deleted = 0",
+            (name,)
         )
         if existing_name:
             return {'success': False, 'message': '空间名称已存在'}
@@ -26,16 +20,10 @@ class SpaceService:
         # 生成密码哈希
         password_hash = hash_password(password)
 
-        # 先将已过期的同密码空间标记为删除（释放密码）
-        db.execute(
-            "UPDATE spaces SET is_deleted = 1 WHERE password_hash = ? AND expires_at <= ?",
-            (password_hash, datetime.now())
-        )
-
-        # 检查密码是否已被使用（排除已删除和已过期的）
+        # 检查密码是否已被使用（密码必须唯一）
         existing_password = db.query_one(
-            "SELECT id FROM spaces WHERE password_hash = ? AND is_deleted = 0 AND expires_at > ?",
-            (password_hash, datetime.now())
+            "SELECT id FROM spaces WHERE password_hash = ? AND is_deleted = 0",
+            (password_hash,)
         )
         if existing_password:
             return {'success': False, 'message': '该密码已被使用，请更换密码'}
