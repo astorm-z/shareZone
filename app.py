@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify, redirect, url_for
+from flask import Flask, render_template, request, jsonify, redirect, url_for, make_response
 from flask_cors import CORS
 import config
 import os
@@ -34,6 +34,23 @@ cleanup_service = CleanupService()
 @app.route('/')
 def index():
     """首页路由"""
+    # 检查是否有pwd参数（加密后的密码），自动登录
+    pwd = request.args.get('pwd')
+    if pwd:
+        from services.auth_service import AuthService
+        auth_service = AuthService()
+        if auth_service.verify_system_password_hash(pwd):
+            token, expires_at = auth_service.generate_token()
+            response = make_response(redirect(url_for('space.home_page')))
+            response.set_cookie(
+                'auth_token',
+                token,
+                max_age=config.AUTH_TOKEN_EXPIRES * 24 * 60 * 60,
+                httponly=True,
+                samesite='Lax'
+            )
+            return response
+
     # 检查是否已登录
     auth_token = request.cookies.get('auth_token')
     if not auth_token:

@@ -10,6 +10,19 @@ auth_service = AuthService()
 @bp.route('/login-page')
 def login_page():
     """登录页面"""
+    # 检查是否有pwd参数（加密后的密码），自动登录
+    pwd = request.args.get('pwd')
+    if pwd and auth_service.verify_system_password_hash(pwd):
+        token, expires_at = auth_service.generate_token()
+        response = make_response(redirect('/home'))
+        response.set_cookie(
+            'auth_token',
+            token,
+            max_age=config.AUTH_TOKEN_EXPIRES * 24 * 60 * 60,
+            httponly=True,
+            samesite='Lax'
+        )
+        return response
     return render_template('login.html')
 
 

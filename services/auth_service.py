@@ -1,4 +1,5 @@
 import uuid
+import hashlib
 from datetime import datetime, timedelta
 import config
 from database.db_manager import db
@@ -10,6 +11,11 @@ class AuthService:
     def verify_system_password(self, password):
         """验证系统密码"""
         return password == config.SYSTEM_PASSWORD
+
+    def verify_system_password_hash(self, pwd_hash):
+        """验证系统密码的哈希值"""
+        expected_hash = hashlib.sha256(config.SYSTEM_PASSWORD.encode()).hexdigest()
+        return pwd_hash == expected_hash
 
     def generate_token(self):
         """生成认证令牌"""

@@ -12,6 +12,9 @@ auth_service = AuthService()
 @bp.route('/home')
 def home_page():
     """首页"""
+    auth_token = request.cookies.get('auth_token')
+    if not auth_token or not auth_service.validate_token(auth_token):
+        return redirect('/api/auth/login-page')
     return render_template('home.html')
 
 
