@@ -35,6 +35,7 @@ function displaySpaceList(spaces) {
         <div class="space-item clay-card" onclick="goToSpace(${space.id})">
             <h3>${escapeHtml(space.name)}</h3>
             <p class="space-time">创建于 ${formatDateTime(space.created_at)}</p>
+            <p class="space-expires-text">⏰ ${formatTimeRemaining(space.expires_at)}</p>
         </div>
     `).join('');
 }
@@ -177,5 +178,30 @@ async function confirmDeleteSpace() {
     } catch (error) {
         console.error('删除空间失败:', error);
         showError('删除空间失败，请重试');
+    }
+}
+
+// 延长空间过期时间
+async function extendSpace() {
+    try {
+        const response = await fetch(`/api/spaces/${SPACE_ID}/extend`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ hours: 24 })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showSuccess('已延长24小时');
+            loadSpaceInfo();
+        } else {
+            showError(data.message || '延长失败');
+        }
+    } catch (error) {
+        console.error('延长空间时间失败:', error);
+        showError('延长失败，请重试');
     }
 }

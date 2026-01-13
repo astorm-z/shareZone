@@ -41,6 +41,28 @@ function formatDateTime(dateString) {
     return date.toLocaleString('zh-CN');
 }
 
+// 格式化剩余时间
+function formatTimeRemaining(expiresAt) {
+    const now = new Date();
+    const expires = new Date(expiresAt);
+    const diff = expires - now;
+
+    if (diff <= 0) return '已过期';
+
+    const hours = Math.floor(diff / (1000 * 60 * 60));
+    const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+
+    if (hours >= 24) {
+        const days = Math.floor(hours / 24);
+        const remainingHours = hours % 24;
+        return `${days}天${remainingHours}小时后清理`;
+    } else if (hours > 0) {
+        return `${hours}小时${minutes}分钟后清理`;
+    } else {
+        return `${minutes}分钟后清理`;
+    }
+}
+
 // HTML转义
 function escapeHtml(text) {
     const div = document.createElement('div');

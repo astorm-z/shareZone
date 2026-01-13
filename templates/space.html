@@ -19,8 +19,14 @@
         <!-- 文件列表 -->
         <div class="file-list-container clay-card">
             <div class="file-list-header">
-                <h3 id="currentSpaceName">空间名称</h3>
-                <button class="clay-btn-icon" onclick="showDeleteSpaceConfirm()" title="删除空间">🗑️</button>
+                <div class="space-title-info">
+                    <h3 id="currentSpaceName">空间名称</h3>
+                    <span class="space-expires-info">⏰ <span id="spaceExpires">加载中...</span></span>
+                </div>
+                <div class="space-header-actions">
+                    <button class="clay-btn-icon" onclick="extendSpace()" title="延长24小时">⏳</button>
+                    <button class="clay-btn-icon" onclick="showDeleteSpaceConfirm()" title="删除空间">🗑️</button>
+                </div>
             </div>
 
             <!-- 文件上传 -->

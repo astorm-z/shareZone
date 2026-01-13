@@ -98,3 +98,31 @@ class SpaceService:
             (space_id, datetime.now())
         )
         return space
+
+    def extend_space_expiry(self, space_id, hours=24):
+        """延长空间过期时间"""
+        space = self.get_space_by_id(space_id)
+        if not space:
+            return {'success': False, 'message': '空间不存在'}
+
+        # 计算新的过期时间
+        current_expires = datetime.fromisoformat(space['expires_at']) if isinstance(space['expires_at'], str) else space['expires_at']
+        new_expires = current_expires + timedelta(hours=hours)
+
+        # 检查是否超过最大延长时间（从创建时间算起最多7天）
+        created_at = datetime.fromisoformat(space['created_at']) if isinstance(space['created_at'], str) else space['created_at']
+        max_expires = created_at + timedelta(days=config.MAX_EXTEND_DAYS)
+
+        if new_expires > max_expires:
+            new_expires = max_expires
+
+        # 如果已经达到最大时间，不能再延长
+        if current_expires >= max_expires:
+            return {'success': False, 'message': '已达到最大保留时间（7天）'}
+
+        db.execute(
+            "UPDATE spaces SET expires_at = ? WHERE id = ?",
+            (new_expires, space_id)
+        )
+
+        return {'success': True, 'new_expires_at': new_expires.isoformat()}

@@ -20,6 +20,11 @@ async function loadSpaceInfo() {
 
         if (data.success && data.space) {
             document.getElementById('currentSpaceName').textContent = data.space.name;
+            // 显示空间过期时间
+            const spaceExpiresEl = document.getElementById('spaceExpires');
+            if (spaceExpiresEl) {
+                spaceExpiresEl.textContent = formatTimeRemaining(data.space.expires_at);
+            }
         }
     } catch (error) {
         console.error('加载空间信息失败:', error);
@@ -96,8 +101,12 @@ function displayFileList(files) {
                 <div class="file-info">
                     ${preview}
                     <p class="file-time">${formatDateTime(file.created_at)}</p>
+                    <p class="file-expires">⏰ ${formatTimeRemaining(file.expires_at)}</p>
                 </div>
-                <button class="file-delete-btn" onclick="event.stopPropagation(); deleteFile(${file.id})" title="删除">🗑️</button>
+                <div class="file-actions">
+                    <button class="file-extend-btn" onclick="event.stopPropagation(); extendFile(${file.id})" title="延长24小时">⏳</button>
+                    <button class="file-delete-btn" onclick="event.stopPropagation(); deleteFile(${file.id})" title="删除">🗑️</button>
+                </div>
             </div>
         `;
     }).join('');
@@ -127,11 +136,11 @@ function displayFilePreview(file) {
     if (file.file_type === 'text') {
         previewArea.innerHTML = `
             <div class="text-preview">
-                <pre id="textContent">${escapeHtml(file.content)}</pre>
-                <div class="preview-actions">
-                    <button class="clay-btn-primary" onclick="copyText()">复制文本</button>
-                    <button class="clay-btn-secondary" onclick="editText()">编辑</button>
+                <div class="preview-actions-top">
+                    <button class="clay-btn-small" onclick="copyText()">复制文本</button>
+                    <button class="clay-btn-small-secondary" onclick="editText()">编辑</button>
                 </div>
+                <pre id="textContent">${escapeHtml(file.content)}</pre>
             </div>
         `;
     } else if (file.file_type === 'image') {
@@ -147,11 +156,11 @@ function displayFilePreview(file) {
         // 文本文件（有content字段）
         previewArea.innerHTML = `
             <div class="text-preview">
-                <pre id="textContent">${escapeHtml(file.content)}</pre>
-                <div class="preview-actions">
-                    <button class="clay-btn-primary" onclick="copyText()">复制文本</button>
-                    <button class="clay-btn-secondary" onclick="downloadFile(${file.id})">下载</button>
+                <div class="preview-actions-top">
+                    <button class="clay-btn-small" onclick="copyText()">复制文本</button>
+                    <button class="clay-btn-small-secondary" onclick="downloadFile(${file.id})">下载</button>
                 </div>
+                <pre id="textContent">${escapeHtml(file.content)}</pre>
             </div>
         `;
     } else {
@@ -372,5 +381,30 @@ async function deleteFile(fileId) {
     } catch (error) {
         console.error('删除文件失败:', error);
         showError('删除失败，请重试');
+    }
+}
+
+// 延长文件过期时间
+async function extendFile(fileId) {
+    try {
+        const response = await fetch(`/api/files/${fileId}/extend`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ hours: 24 })
+        });
+
+        const data = await response.json();
+
+        if (data.success) {
+            showSuccess('已延长24小时');
+            loadFileList();
+        } else {
+            showError(data.message || '延长失败');
+        }
+    } catch (error) {
+        console.error('延长文件时间失败:', error);
+        showError('延长失败，请重试');
     }
 }

@@ -132,3 +132,31 @@ class FileService:
             return file['content'].encode('utf-8'), 'text/plain; charset=utf-8'
         else:
             return file['file_path'], file['mime_type']
+
+    def extend_file_expiry(self, file_id, hours=24):
+        """延长文件过期时间"""
+        file = self.get_file_by_id(file_id)
+        if not file:
+            return {'success': False, 'message': '文件不存在'}
+
+        # 计算新的过期时间
+        current_expires = datetime.fromisoformat(file['expires_at']) if isinstance(file['expires_at'], str) else file['expires_at']
+        new_expires = current_expires + timedelta(hours=hours)
+
+        # 检查是否超过最大延长时间（从创建时间算起最多7天）
+        created_at = datetime.fromisoformat(file['created_at']) if isinstance(file['created_at'], str) else file['created_at']
+        max_expires = created_at + timedelta(days=config.MAX_EXTEND_DAYS)
+
+        if new_expires > max_expires:
+            new_expires = max_expires
+
+        # 如果已经达到最大时间，不能再延长
+        if current_expires >= max_expires:
+            return {'success': False, 'message': '已达到最大保留时间（7天）'}
+
+        db.execute(
+            "UPDATE files SET expires_at = ? WHERE id = ?",
+            (new_expires, file_id)
+        )
+
+        return {'success': True, 'new_expires_at': new_expires.isoformat()}

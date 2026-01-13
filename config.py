@@ -25,6 +25,7 @@ SPACE_TOKEN_EXPIRES = 1  # 天
 FILE_EXPIRES_HOURS = 24
 SPACE_EXPIRES_HOURS = 24
 CLEANUP_INTERVAL_MINUTES = 10
+MAX_EXTEND_DAYS = 7  # 最大延长天数
 
 # 允许的图片扩展名
 ALLOWED_IMAGE_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif', 'bmp', 'webp'}

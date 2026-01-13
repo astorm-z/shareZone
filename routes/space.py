@@ -130,3 +130,20 @@ def update_access(space_id):
 
     space_service.record_space_access(auth_token, space_id)
     return jsonify({'success': True})
+
+
+@bp.route('/api/spaces/<int:space_id>/extend', methods=['POST'])
+def extend_space(space_id):
+    """延长空间过期时间"""
+    auth_token = request.cookies.get('auth_token')
+    if not auth_token or not auth_service.validate_token(auth_token):
+        return jsonify({'success': False, 'message': '未登录'}), 401
+
+    data = request.get_json() or {}
+    hours = data.get('hours', 24)
+
+    result = space_service.extend_space_expiry(space_id, hours)
+
+    if result['success']:
+        return jsonify(result)
+    return jsonify(result), 400

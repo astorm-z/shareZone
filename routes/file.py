@@ -160,3 +160,20 @@ def delete_file(file_id):
         return jsonify(result)
     else:
         return jsonify(result), 400
+
+
+@bp.route('/api/files/<int:file_id>/extend', methods=['POST'])
+def extend_file(file_id):
+    """延长文件过期时间"""
+    auth_token = request.cookies.get('auth_token')
+    if not auth_token or not auth_service.validate_token(auth_token):
+        return jsonify({'success': False, 'message': '未登录'}), 401
+
+    data = request.get_json() or {}
+    hours = data.get('hours', 24)
+
+    result = file_service.extend_file_expiry(file_id, hours)
+
+    if result['success']:
+        return jsonify(result)
+    return jsonify(result), 400
