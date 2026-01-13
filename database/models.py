@@ -6,8 +6,8 @@ CREATE_TABLES_SQL = """
 -- 空间表
 CREATE TABLE IF NOT EXISTS spaces (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
-    name VARCHAR(100) NOT NULL UNIQUE,
-    password_hash VARCHAR(255) NOT NULL UNIQUE,
+    name VARCHAR(100) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     last_accessed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     expires_at TIMESTAMP NOT NULL,
@@ -16,6 +16,7 @@ CREATE TABLE IF NOT EXISTS spaces (
 
 CREATE INDEX IF NOT EXISTS idx_spaces_expires ON spaces(expires_at);
 CREATE INDEX IF NOT EXISTS idx_spaces_password ON spaces(password_hash);
+CREATE INDEX IF NOT EXISTS idx_spaces_name ON spaces(name);
 
 -- 文件表
 CREATE TABLE IF NOT EXISTS files (
@@ -61,4 +62,33 @@ CREATE TABLE IF NOT EXISTS space_access (
 
 CREATE INDEX IF NOT EXISTS idx_access_token ON space_access(token);
 CREATE INDEX IF NOT EXISTS idx_access_space ON space_access(space_id);
+"""
+
+# 迁移脚本：去掉 spaces 表的 UNIQUE 约束
+MIGRATE_SPACES_TABLE = """
+-- 创建新表（无 UNIQUE 约束）
+CREATE TABLE IF NOT EXISTS spaces_new (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name VARCHAR(100) NOT NULL,
+    password_hash VARCHAR(255) NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    last_accessed_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    expires_at TIMESTAMP NOT NULL,
+    is_deleted BOOLEAN DEFAULT 0
+);
+
+-- 复制数据
+INSERT INTO spaces_new (id, name, password_hash, created_at, last_accessed_at, expires_at, is_deleted)
+SELECT id, name, password_hash, created_at, last_accessed_at, expires_at, is_deleted FROM spaces;
+
+-- 删除旧表
+DROP TABLE spaces;
+
+-- 重命名新表
+ALTER TABLE spaces_new RENAME TO spaces;
+
+-- 重建索引
+CREATE INDEX IF NOT EXISTS idx_spaces_expires ON spaces(expires_at);
+CREATE INDEX IF NOT EXISTS idx_spaces_password ON spaces(password_hash);
+CREATE INDEX IF NOT EXISTS idx_spaces_name ON spaces(name);
 """
